@@ -1,4 +1,4 @@
-# Relevant Reputation Protocol
+# Relevant Reputation Protocol [![GoDoc](https://godoc.org/github.com/relevant-community/reputation?status.svg)](https://godoc.org/github.com/relevant-community/reputation) [![GoCover](http://gocover.io/_badge/github.com/relevant-community/reputation)](http://gocover.io/github.com/relevant-community/reputation) [![Go Report Card](https://goreportcard.com/badge/github.com/relevant-community/reputation)](https://goreportcard.com/report/github.com/relevant-community/reputation)
 
 This is a personalized pagerank algorithm that supports negative links.
 It can be used for voting, governance and ranking of data

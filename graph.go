@@ -2,7 +2,7 @@
 // a personalized pagerank algorithm that supports negative links
 // personalized version offers sybil resistance
 // can be used for voting, governance, ranking
-// refereces:
+// refrences:
 // https://github.com/alixaxel/pagerank
 // https://github.com/dcadenas/pagerank
 // notes:
@@ -93,7 +93,7 @@ func (graph *Graph) Link(source, target NodeInput, weight float64) {
 	sourceKey := getKey(source.Id, Positive)
 	sourceNode := graph.initNode(sourceKey, source, Positive)
 
-	// if weight is negative we use negative recieving node
+	// if weight is negative we use negative receiving node
 	var nodeType NodeType
 	if nodeType = Positive; weight < 0 {
 		nodeType = Negative
@@ -117,20 +117,21 @@ func (graph *Graph) Finalize() {
 	graph.processNegatives()
 }
 
-// this method creates an extra outgoing link from positive nodes
+// processNegatives creates an extra outgoing link from positive nodes
 // if they have a negative counterpart
-// this reduced the weight of the outgoing links from low-ranking nodes
+// this reduces the weight of the outgoing links from low-ranking nodes
 func (graph *Graph) processNegatives() {
 	negConsumerInput := graph.negConsumer
 
 	for _, negNode := range graph.negNodes {
+		// positive node doesn't exist
 		if _, ok := graph.nodes[negNode.id]; ok == false {
-			panic("negative node is missing")
-		}
-		if graph.nodes[negNode.id].rank == 0 {
 			return
 		}
 		posNode := graph.nodes[negNode.id]
+		if posNode.rank == 0 {
+			return
+		}
 		negConsumer := graph.initNode(negConsumerInput.Id, negConsumerInput, Positive)
 
 		// this is the weight we add to the outgoing node
