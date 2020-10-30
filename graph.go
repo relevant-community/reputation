@@ -1,4 +1,4 @@
-// Implementation of the Relevant Reputaiton protocol:
+// Package reputation is an implementation of the Relevant Reputaiton protocol:
 // a personalized pagerank algorithm that supports negative links
 // personalized version offers sybil resistance
 // can be used for voting, governance, ranking
@@ -17,8 +17,13 @@ import (
 	"strconv"
 )
 
+// NodeType is positive or negative
+// each node in the graph can be represented by two nodes,
+// a positive and a negative one
 type NodeType int
 
+// Positive nodes are consumers of positive links
+// Negative nodes are consumers of neg links
 const (
 	Positive NodeType = iota
 	Negative

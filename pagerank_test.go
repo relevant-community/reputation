@@ -122,6 +122,40 @@ func TestPersonalized(t *testing.T) {
 	}
 }
 
+func TestPersonalizedNoLink(t *testing.T) {
+	graph := NewGraph(0.85, 0.000001, 0)
+
+	a := NewNodeInput("a", 0, 0)
+	b := NewNodeInput("b", 0, 0)
+	c := NewNodeInput("c", 0, 0)
+	d := NewNodeInput("d", 0, 0)
+
+	graph.AddPersonalizationNode(a)
+
+	graph.Link(b, c, 1.0)
+	graph.Link(d, c, 1.0)
+
+	actual := map[string]Result{}
+
+	expected := map[string]Result{
+		"a": {pRank: 1.0, nRank: 0},
+		"b": {pRank: 0, nRank: 0},
+		"c": {pRank: 0, nRank: 0},
+		"d": {pRank: 0, nRank: 0},
+	}
+
+	graph.Rank(func(id string, pRank float64, nRank float64) {
+		actual[id] = Result{
+			pRank: pRank,
+			nRank: nRank,
+		}
+	})
+
+	if reflect.DeepEqual(actual, expected) != true {
+		t.Error("Expected", expected, "but got", actual)
+	}
+}
+
 func TestCancelOpposites(t *testing.T) {
 	graph := NewGraph(0.85, 0.000001, 0)
 
