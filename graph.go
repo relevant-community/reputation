@@ -2,7 +2,7 @@
 // a personalized pagerank algorithm that supports negative links
 // personalized version offers sybil resistance
 // can be used for voting, governance, ranking
-// refrences:
+// references:
 // https://github.com/alixaxel/pagerank
 // https://github.com/dcadenas/pagerank
 // notes:
