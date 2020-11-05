@@ -313,6 +313,66 @@ func TestNegativeConsumer(t *testing.T) {
 	})
 
 	if eRank <= actual["e"].pRank {
-		t.Errorf("weight of neg node should decrease")
+		t.Errorf("weight of neg node should decrease %f, %f", eRank, actual["e"].pRank)
+	}
+}
+
+func TestMaxNeg(t *testing.T) {
+	graph := NewGraph(0.85, 0.000001, 0)
+
+	a := NewNodeInput("a", 0, 0)
+	b := NewNodeInput("b", 0, 0)
+	c := NewNodeInput("c", 0, 0)
+	d := NewNodeInput("d", 0, 0)
+	e := NewNodeInput("e", 0, 0)
+
+	graph.AddPersonalizationNode(a)
+
+	graph.Link(a, b, MAX_NEG_OFFSET+1)
+	graph.Link(a, c, MAX_NEG_OFFSET+2)
+	graph.Link(c, d, 1.0)
+	graph.Link(b, d, -1.0)
+	graph.Link(d, e, 1.0)
+
+	actual := map[string]Result{}
+
+	graph.Rank(func(id string, pRank float64, nRank float64) {
+		actual[id] = Result{
+			pRank: pRank,
+			nRank: nRank,
+		}
+	})
+
+	// use prev computation as input for the next iteration
+
+	graph = NewGraph(0.85, 0.000001, actual["negConsumer"].pRank)
+
+	eRank := actual["e"].pRank
+
+	a = NewNodeInput("a", actual["a"].pRank, actual["a"].nRank)
+	b = NewNodeInput("b", actual["b"].pRank, actual["b"].nRank)
+	c = NewNodeInput("c", actual["c"].pRank, actual["c"].nRank)
+	d = NewNodeInput("d", actual["d"].pRank, actual["d"].nRank)
+	e = NewNodeInput("e", 0, 0)
+
+	graph.AddPersonalizationNode(a)
+
+	graph.Link(a, b, MAX_NEG_OFFSET+1)
+	graph.Link(a, c, MAX_NEG_OFFSET+2)
+	graph.Link(c, d, 1.0)
+	graph.Link(b, d, -1.0)
+	graph.Link(d, e, 1.0)
+
+	actual = map[string]Result{}
+
+	graph.Rank(func(id string, pRank float64, nRank float64) {
+		actual[id] = Result{
+			pRank: pRank,
+			nRank: nRank,
+		}
+	})
+
+	if eRank <= actual["e"].pRank {
+		t.Errorf("weight of neg node should decrease %f, %f", eRank, actual["e"].pRank)
 	}
 }

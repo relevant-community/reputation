@@ -1,7 +1,6 @@
 package reputation
 
 import (
-	"fmt"
 	"math"
 )
 
@@ -79,7 +78,7 @@ func (graph Graph) Rank(callback func(key string, pRank float64, nRank float64))
 		iter++
 	}
 
-	fmt.Println("iterations:", iter, "Δ", Δ)
+	// fmt.Println("iterations:", iter, "Δ", Δ)
 	graph.processResults(callback)
 }
 
