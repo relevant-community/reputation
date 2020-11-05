@@ -1,4 +1,4 @@
-package repDet
+package detrep
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"

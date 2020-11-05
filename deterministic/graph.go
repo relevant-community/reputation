@@ -1,4 +1,4 @@
-// Package reputation is an implementation of the Relevant Reputaiton protocol:
+// Package detrep is a deterministic implementation of the Relevant Reputaiton protocol:
 // a personalized pagerank algorithm that supports negative links
 // personalized version offers sybil resistance
 // can be used for voting, governance, ranking
@@ -10,7 +10,7 @@
 // TODO: edge case (only impacts display) - if a node has no inputs we should set its score to 0 to avoid
 // a stale score if all of nodes inputs are cancelled out
 // would need to keep track of node inputs...
-package repDet
+package detrep
 
 import (
 	"strconv"
@@ -33,13 +33,14 @@ const (
 // Default decimals used in computation
 const Decimals = 18
 
-// this is defines the cutoff for when a node will have it's outging links counted
+// MAX_NEG_OFFSET defines the cutoff for when a node will have it's outging links counted
 // if previously NegativeRank / PositiveRank > MaxNegOffset / (MaxNegOffset + 1) we will not consider
 // any outgoing links
 // otherwise, we counter the outgoing lings with one 'heavy' link proportional to the MaxNegOffset ratio
 const MaxNegOffset = 10
 
-// Node input struct for creating nodes and edges
+// NodeInput is struct passing data to the graph
+// TODO does it make sense to just use the Node type?
 type NodeInput struct {
 	Id    string
 	PRank sdk.Uint
@@ -66,7 +67,7 @@ type Graph struct {
 	MaxNegOffset sdk.Uint
 }
 
-// Pagerank params
+// RankParams is the pagerank parameters
 // α is the probably the person will not teleport
 // ε is the min global error between iterations
 // personalization is the personalization vector (can be nil for non-personalized pr)
@@ -92,7 +93,7 @@ func NewGraph(α sdk.Uint, ε sdk.Uint, negConsumerRank sdk.Uint) *Graph {
 	}
 }
 
-// helper method to create a node input struct
+// NewNodeInput is ahelper method to create a node input struct
 func NewNodeInput(id string, pRank sdk.Uint, nRank sdk.Uint) NodeInput {
 	return NodeInput{Id: id, PRank: pRank, NRank: nRank}
 }

@@ -1,4 +1,4 @@
-// Package reputation is an implementation of the Relevant Reputaiton protocol:
+// Package rep is an implementation of the Relevant Reputaiton protocol:
 // a personalized pagerank algorithm that supports negative links
 // personalized version offers sybil resistance
 // can be used for voting, governance, ranking
@@ -35,14 +35,15 @@ const (
 	Negative
 )
 
-// Node input struct for creating nodes and edges
+// NodeInput is struct passing data to the graph
+// TODO does it make sense to just use the Node type?
 type NodeInput struct {
 	Id    string
 	PRank float64
 	NRank float64
 }
 
-// Internal node struct
+// Node is an internal node struct
 type Node struct {
 	id       string
 	rank     float64 // pos page rank of the node
@@ -60,7 +61,7 @@ type Graph struct {
 	negConsumer NodeInput
 }
 
-// Pagerank params
+// RankParams is the pagerank parameters
 // α is the probably the person will not teleport
 // ε is the min global error between iterations
 // personalization is the personalization vector (can be nil for non-personalized pr)
@@ -84,7 +85,7 @@ func NewGraph(α, ε, negConsumerRank float64) *Graph {
 	}
 }
 
-// helper method to create a node input struct
+// NewNodeInput is ahelper method to create a node input struct
 func NewNodeInput(id string, pRank float64, nRank float64) NodeInput {
 	return NodeInput{Id: id, PRank: pRank, NRank: nRank}
 }
@@ -218,12 +219,12 @@ func (graph *Graph) cancelOpposites(sourceNode Node, target string, nodeType Nod
 	}
 }
 
-// InitPosNode initialized a positive node
+// InitPosNode is a helper method that initializes a positive node
 func (graph *Graph) InitPosNode(inputNode NodeInput) *Node {
 	return graph.initNode(inputNode.Id, inputNode, Positive)
 }
 
-// initNode initialized a node
+// initNode initializes a node
 func (graph *Graph) initNode(key string, inputNode NodeInput, nodeType NodeType) *Node {
 	if _, ok := graph.nodes[key]; ok == false {
 		graph.nodes[key] = &Node{

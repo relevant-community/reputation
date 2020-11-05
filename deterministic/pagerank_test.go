@@ -1,4 +1,4 @@
-package repDet
+package detrep
 
 import (
 	"reflect"
