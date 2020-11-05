@@ -17,11 +17,11 @@ import (
 	"strconv"
 )
 
-// this is defines the cutoff for when a node will have it's outging links counted
+// MaxNegOffset defines the cutoff for when a node will have it's outging links counted
 // if previously NegativeRank / PositiveRank > MaxNegOffset / (MaxNegOffset + 1) we will not consider
 // any outgoing links
 // otherwise, we counter the outgoing lings with one 'heavy' link proportional to the MaxNegOffset ratio
-const MAX_NEG_OFFSET = float64(10)
+const MaxNegOffset = float64(10)
 
 // NodeType is positive or negative
 // each node in the graph can be represented by two nodes,
@@ -38,7 +38,7 @@ const (
 // NodeInput is struct passing data to the graph
 // TODO does it make sense to just use the Node type?
 type NodeInput struct {
-	Id    string
+	ID    string
 	PRank float64
 	NRank float64
 }
@@ -81,20 +81,20 @@ func NewGraph(α, ε, negConsumerRank float64) *Graph {
 			ε:               ε,
 			personalization: make([]string, 0),
 		},
-		negConsumer: NodeInput{Id: "negConsumer", PRank: negConsumerRank, NRank: 0},
+		negConsumer: NodeInput{ID: "negConsumer", PRank: negConsumerRank, NRank: 0},
 	}
 }
 
 // NewNodeInput is ahelper method to create a node input struct
 func NewNodeInput(id string, pRank float64, nRank float64) NodeInput {
-	return NodeInput{Id: id, PRank: pRank, NRank: nRank}
+	return NodeInput{ID: id, PRank: pRank, NRank: nRank}
 }
 
 // AddPersonalizationNode adds a node to the pagerank personlization vector
 // these nodes will have high rank by default and all other rank will stem from them
 // this makes non-personalaziation nodes sybil resistant (they cannot increase their own rank)
 func (graph *Graph) AddPersonalizationNode(pNode NodeInput) {
-	graph.params.personalization = append(graph.params.personalization, pNode.Id)
+	graph.params.personalization = append(graph.params.personalization, pNode.ID)
 	// this to ensures source nodes exist
 	graph.InitPosNode(pNode)
 }
@@ -104,11 +104,11 @@ func (graph *Graph) AddPersonalizationNode(pNode NodeInput) {
 func (graph *Graph) Link(source, target NodeInput, weight float64) {
 
 	// if a node's neg/post rank ration is too high we don't process its links
-	if source.PRank > 0 && source.NRank/source.PRank > MAX_NEG_OFFSET/(MAX_NEG_OFFSET+1) {
+	if source.PRank > 0 && source.NRank/source.PRank > MaxNegOffset/(MaxNegOffset+1) {
 		return
 	}
 
-	sourceKey := getKey(source.Id, Positive)
+	sourceKey := getKey(source.ID, Positive)
 	sourceNode := graph.initNode(sourceKey, source, Positive)
 
 	// if weight is negative we use negative receiving node
@@ -116,7 +116,7 @@ func (graph *Graph) Link(source, target NodeInput, weight float64) {
 	if nodeType = Positive; weight < 0 {
 		nodeType = Negative
 	}
-	targetKey := getKey(target.Id, nodeType)
+	targetKey := getKey(target.ID, nodeType)
 
 	graph.initNode(targetKey, target, nodeType)
 
@@ -128,7 +128,7 @@ func (graph *Graph) Link(source, target NodeInput, weight float64) {
 	graph.edges[sourceKey][targetKey] += math.Abs(weight)
 
 	// note: use target.id here to make sure we reference the original id
-	graph.cancelOpposites(*sourceNode, target.Id, nodeType)
+	graph.cancelOpposites(*sourceNode, target.ID, nodeType)
 }
 
 // Finalize is the method that runs after all other inits and before pagerank
@@ -161,14 +161,14 @@ func (graph *Graph) processNegatives() {
 			panic("negative ranking nodes should not have any degree") // this should never happen
 		}
 
-		negConsumer := graph.initNode(negConsumerInput.Id, negConsumerInput, Positive)
+		negConsumer := graph.initNode(negConsumerInput.ID, negConsumerInput, Positive)
 
 		var negMultiple float64
 
 		// this first case should not happen because we ignore these links
-		if negNode.rank/posNode.rank > MAX_NEG_OFFSET/(MAX_NEG_OFFSET+1) {
+		if negNode.rank/posNode.rank > MaxNegOffset/(MaxNegOffset+1) {
 			// cap the degree multiple at MAX_NEG_OFFSET
-			negMultiple = MAX_NEG_OFFSET
+			negMultiple = MaxNegOffset
 		} else {
 			negMultiple = 1/(1-negNode.rank/posNode.rank) - 1
 		}
@@ -221,14 +221,14 @@ func (graph *Graph) cancelOpposites(sourceNode Node, target string, nodeType Nod
 
 // InitPosNode is a helper method that initializes a positive node
 func (graph *Graph) InitPosNode(inputNode NodeInput) *Node {
-	return graph.initNode(inputNode.Id, inputNode, Positive)
+	return graph.initNode(inputNode.ID, inputNode, Positive)
 }
 
 // initNode initializes a node
 func (graph *Graph) initNode(key string, inputNode NodeInput, nodeType NodeType) *Node {
 	if _, ok := graph.nodes[key]; ok == false {
 		graph.nodes[key] = &Node{
-			id:       inputNode.Id, // id is independent of pos/neg keys
+			id:       inputNode.ID, // id is independent of pos/neg keys
 			degree:   0,
 			nodeType: nodeType,
 		}

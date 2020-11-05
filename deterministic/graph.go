@@ -30,10 +30,10 @@ const (
 	Negative
 )
 
-// Default decimals used in computation
+// Decimals is the default decimals used in computation
 const Decimals = 18
 
-// MAX_NEG_OFFSET defines the cutoff for when a node will have it's outging links counted
+// MaxNegOffset defines the cutoff for when a node will have it's outging links counted
 // if previously NegativeRank / PositiveRank > MaxNegOffset / (MaxNegOffset + 1) we will not consider
 // any outgoing links
 // otherwise, we counter the outgoing lings with one 'heavy' link proportional to the MaxNegOffset ratio
@@ -42,12 +42,12 @@ const MaxNegOffset = 10
 // NodeInput is struct passing data to the graph
 // TODO does it make sense to just use the Node type?
 type NodeInput struct {
-	Id    string
+	ID    string
 	PRank sdk.Uint
 	NRank sdk.Uint
 }
 
-// Internal node struct
+// Node is an internal node struct
 type Node struct {
 	id       string
 	rank     sdk.Uint // pos page rank of the node
@@ -87,7 +87,7 @@ func NewGraph(α sdk.Uint, ε sdk.Uint, negConsumerRank sdk.Uint) *Graph {
 			ε:               ε,
 			personalization: make([]string, 0),
 		},
-		negConsumer:  NodeInput{Id: "negConsumer", PRank: negConsumerRank, NRank: sdk.ZeroUint()},
+		negConsumer:  NodeInput{ID: "negConsumer", PRank: negConsumerRank, NRank: sdk.ZeroUint()},
 		Precision:    sdk.NewUintFromBigInt(sdk.NewIntWithDecimal(1, Decimals).BigInt()),
 		MaxNegOffset: sdk.NewUintFromBigInt(sdk.NewIntWithDecimal(MaxNegOffset, Decimals).BigInt()),
 	}
@@ -95,14 +95,14 @@ func NewGraph(α sdk.Uint, ε sdk.Uint, negConsumerRank sdk.Uint) *Graph {
 
 // NewNodeInput is ahelper method to create a node input struct
 func NewNodeInput(id string, pRank sdk.Uint, nRank sdk.Uint) NodeInput {
-	return NodeInput{Id: id, PRank: pRank, NRank: nRank}
+	return NodeInput{ID: id, PRank: pRank, NRank: nRank}
 }
 
 // AddPersonalizationNode adds a node to the pagerank personlization vector
 // these nodes will have high rank by default and all other rank will stem from them
 // this makes non-personalaziation nodes sybil resistant (they cannot increase their own rank)
 func (graph *Graph) AddPersonalizationNode(pNode NodeInput) {
-	graph.params.personalization = append(graph.params.personalization, pNode.Id)
+	graph.params.personalization = append(graph.params.personalization, pNode.ID)
 	// this to ensures source nodes exist
 	graph.InitPosNode(pNode)
 }
@@ -120,7 +120,7 @@ func (graph *Graph) Link(source, target NodeInput, weight sdk.Int) {
 		}
 	}
 
-	sourceKey := getKey(source.Id, Positive)
+	sourceKey := getKey(source.ID, Positive)
 	sourceNode := graph.initNode(sourceKey, source, Positive)
 
 	// if weight is negative we use negative receiving node
@@ -133,7 +133,7 @@ func (graph *Graph) Link(source, target NodeInput, weight sdk.Int) {
 		nodeType = Positive
 		weightUint = sdk.NewUintFromBigInt(weight.BigInt())
 	}
-	targetKey := getKey(target.Id, nodeType)
+	targetKey := getKey(target.ID, nodeType)
 
 	graph.initNode(targetKey, target, nodeType)
 
@@ -150,7 +150,7 @@ func (graph *Graph) Link(source, target NodeInput, weight sdk.Int) {
 	graph.edges[sourceKey][targetKey] = graph.edges[sourceKey][targetKey].Add(weightUint)
 
 	// note: use target.id here to make sure we reference the original id
-	graph.cancelOpposites(*sourceNode, target.Id, nodeType)
+	graph.cancelOpposites(*sourceNode, target.ID, nodeType)
 }
 
 // Finalize is the method that runs after all other inits and before pagerank
@@ -179,7 +179,7 @@ func (graph *Graph) processNegatives() {
 		if posNode.rank.IsZero() || negNode.rank.IsZero() {
 			return
 		}
-		negConsumer := graph.initNode(negConsumerInput.Id, negConsumerInput, Positive)
+		negConsumer := graph.initNode(negConsumerInput.ID, negConsumerInput, Positive)
 
 		one := graph.Precision
 
@@ -251,14 +251,14 @@ func (graph *Graph) cancelOpposites(sourceNode Node, target string, nodeType Nod
 
 // InitPosNode initialized a positive node
 func (graph *Graph) InitPosNode(inputNode NodeInput) *Node {
-	return graph.initNode(inputNode.Id, inputNode, Positive)
+	return graph.initNode(inputNode.ID, inputNode, Positive)
 }
 
 // initNode initialized a node
 func (graph *Graph) initNode(key string, inputNode NodeInput, nodeType NodeType) *Node {
 	if _, ok := graph.nodes[key]; ok == false {
 		graph.nodes[key] = &Node{
-			id:       inputNode.Id, // id is independent of pos/neg keys
+			id:       inputNode.ID, // id is independent of pos/neg keys
 			degree:   sdk.ZeroUint(),
 			rank:     sdk.ZeroUint(),
 			rankNeg:  sdk.ZeroUint(),

@@ -328,8 +328,8 @@ func TestMaxNeg(t *testing.T) {
 
 	graph.AddPersonalizationNode(a)
 
-	graph.Link(a, b, MAX_NEG_OFFSET+1)
-	graph.Link(a, c, MAX_NEG_OFFSET+2)
+	graph.Link(a, b, MaxNegOffset+1)
+	graph.Link(a, c, MaxNegOffset+2)
 	graph.Link(c, d, 1.0)
 	graph.Link(b, d, -1.0)
 	graph.Link(d, e, 1.0)
@@ -357,8 +357,8 @@ func TestMaxNeg(t *testing.T) {
 
 	graph.AddPersonalizationNode(a)
 
-	graph.Link(a, b, MAX_NEG_OFFSET+1)
-	graph.Link(a, c, MAX_NEG_OFFSET+2)
+	graph.Link(a, b, MaxNegOffset+1)
+	graph.Link(a, c, MaxNegOffset+2)
 	graph.Link(c, d, 1.0)
 	graph.Link(b, d, -1.0)
 	graph.Link(d, e, 1.0)
