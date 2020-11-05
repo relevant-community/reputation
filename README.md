@@ -1,4 +1,8 @@
-# Relevant Reputation Protocol [![GoDoc](https://godoc.org/github.com/relevant-community/reputation?status.svg)](https://godoc.org/github.com/relevant-community/reputation) [![GoCover](http://gocover.io/_badge/github.com/relevant-community/reputation?service=github)](http://gocover.io/github.com/relevant-community/reputation) [![Go Report Card](https://goreportcard.com/badge/github.com/relevant-community/reputation)](https://goreportcard.com/report/github.com/relevant-community/reputation)
+# Relevant Reputation Protocol
+
+deterministic version: [![GoDoc](https://godoc.org/github.com/relevant-community/reputation/deterministic?status.svg)](https://godoc.org/github.com/relevant-community/reputation/deterministic) [![GoCover](http://gocover.io/_badge/github.com/relevant-community/reputation/deterministic?service=github)](http://gocover.io/github.com/relevant-community/reputation/deterministic) [![Go Report Card](https://goreportcard.com/badge/github.com/relevant-community/reputation/deterministic)](https://goreportcard.com/report/github.com/relevant-community/reputation/deterministic)
+
+non-deterministic version: [![GoDoc](https://godoc.org/github.com/relevant-community/reputation/non-deterministic?status.svg)](https://godoc.org/github.com/relevant-community/reputation/non-deterministic) [![GoCover](http://gocover.io/_badge/github.com/relevant-community/reputation/non-deterministic?service=github)](http://gocover.io/github.com/relevant-community/reputation/non-deterministic) [![Go Report Card](https://goreportcard.com/badge/github.com/relevant-community/reputation/non-deterministic)](https://goreportcard.com/report/github.com/relevant-community/reputation/non-deterministic)
 
 This is a personalized pagerank algorithm that supports negative links.
 It can be used for voting, governance and ranking of data
