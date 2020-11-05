@@ -1,14 +1,8 @@
-package reputation_det
+package repDet
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
-
-type Results struct {
-	rankPos float64
-	rankNeg float64
-	id      string
-}
 
 func (graph Graph) processResults(callback func(id string, pRank sdk.Uint, nRank sdk.Uint)) {
 	graph.mergeNegatives()

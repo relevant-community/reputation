@@ -1,10 +1,4 @@
-package reputation
-
-type Results struct {
-	rankPos float64
-	rankNeg float64
-	id      string
-}
+package rep
 
 func (graph Graph) processResults(callback func(id string, pRank float64, nRank float64)) {
 	graph.mergeNegatives()

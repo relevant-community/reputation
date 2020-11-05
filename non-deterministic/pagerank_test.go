@@ -1,4 +1,4 @@
-package reputation
+package rep
 
 import (
 	"reflect"

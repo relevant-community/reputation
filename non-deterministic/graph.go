@@ -10,13 +10,17 @@
 // TODO: edge case (only impacts display) - if a node has no inputs we should set its score to 0 to avoid
 // a stale score if all of nodes inputs are cancelled out
 // would need to keep track of node inputs...
-package reputation
+package rep
 
 import (
 	"math"
 	"strconv"
 )
 
+// this is defines the cutoff for when a node will have it's outging links counted
+// if previously NegativeRank / PositiveRank > MaxNegOffset / (MaxNegOffset + 1) we will not consider
+// any outgoing links
+// otherwise, we counter the outgoing lings with one 'heavy' link proportional to the MaxNegOffset ratio
 const MAX_NEG_OFFSET = float64(10)
 
 // NodeType is positive or negative
@@ -31,12 +35,14 @@ const (
 	Negative
 )
 
+// Node input struct for creating nodes and edges
 type NodeInput struct {
 	Id    string
 	PRank float64
 	NRank float64
 }
 
+// Internal node struct
 type Node struct {
 	id       string
 	rank     float64 // pos page rank of the node
@@ -54,9 +60,13 @@ type Graph struct {
 	negConsumer NodeInput
 }
 
+// Pagerank params
+// α is the probably the person will not teleport
+// ε is the min global error between iterations
+// personalization is the personalization vector (can be nil for non-personalized pr)
 type RankParams struct {
 	α, ε            float64
-	personalization []string
+	personalization []string // array of ids
 }
 
 // NewGraph initializes and returns a new graph.
@@ -120,6 +130,7 @@ func (graph *Graph) Link(source, target NodeInput, weight float64) {
 	graph.cancelOpposites(*sourceNode, target.Id, nodeType)
 }
 
+// Finalize is the method that runs after all other inits and before pagerank
 func (graph *Graph) Finalize() {
 	graph.processNegatives()
 }
@@ -207,10 +218,12 @@ func (graph *Graph) cancelOpposites(sourceNode Node, target string, nodeType Nod
 	}
 }
 
+// InitPosNode initialized a positive node
 func (graph *Graph) InitPosNode(inputNode NodeInput) *Node {
 	return graph.initNode(inputNode.Id, inputNode, Positive)
 }
 
+// initNode initialized a node
 func (graph *Graph) initNode(key string, inputNode NodeInput, nodeType NodeType) *Node {
 	if _, ok := graph.nodes[key]; ok == false {
 		graph.nodes[key] = &Node{
@@ -232,6 +245,7 @@ func (graph *Graph) initNode(key string, inputNode NodeInput, nodeType NodeType)
 	return graph.nodes[key]
 }
 
+// removeEdge removes edge from graph
 func (graph *Graph) removeEdge(source string, target string) {
 	delete(graph.edges[source], target)
 	if len(graph.edges[source]) == 0 {
@@ -239,6 +253,7 @@ func (graph *Graph) removeEdge(source string, target string) {
 	}
 }
 
+// getKey returns node id for positive nodes and <id>_neg for negative nodes
 func getKey(key string, nodeType NodeType) string {
 	if nodeType == Positive {
 		return key

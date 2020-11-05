@@ -1,4 +1,4 @@
-package reputation_det
+package repDet
 
 import (
 	"reflect"
