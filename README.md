@@ -98,6 +98,8 @@ graph.Rank(func(id string, pRank float64, nRank float64) {
 
 The `Rank` method takes a callback parameter that will be called for each node.
 
+**Note:** If you have negative links, you will want to take the results of the first pagerank computation, and run the algorithm again. This will ensure that the outgoing links from nodes that have a negative component caryy less weight.
+
 ## Core Concepts and Features
 
 ### Personalization
