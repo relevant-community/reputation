@@ -30,7 +30,7 @@ const (
 	Negative
 )
 
-// Decimals is the default decimals used in computation
+// Decimals is the default decimal precision used in computation
 const Decimals = 18
 
 // MaxNegOffset defines the cutoff for when a node will have it's outging links counted
