@@ -8,6 +8,8 @@ detrep (deterministic version): [![GoDoc](https://godoc.org/github.com/relevant-
 
 Relevant Reputation Protocol is a personalized pagerank algorithm that supports negative links. It is used to compute user and content rankings in a reddit-like bulletin board — [Relevant](https://relevant.community).
 
+Disclaimer: The code in this repo has not be audited or tested in production, please use at your own risk.
+
 ## Use Cases
 
 Because the algorithm supports negative links, it can be used to represent upvotes and downvotes. This enables usescases such as voting, governance and ranking of data.
@@ -17,6 +19,10 @@ Because the algorithm supports negative links, it can be used to represent upvot
 The deterministiv version of the algorithm uses `Uint` and safe-math libs from [Cosmos Sdk](https://github.com/cosmos/cosmos-sdk) to avoid floating point computations. It can be used in a blockchain environment where concensus is required.
 
 ## Usage
+
+For complete usage examples, check out the test files: https://github.com/relevant-community/reputation/blob/main/rep/pagerank_test.go and https://github.com/relevant-community/reputation/blob/main/detrep/pagerank_test.go
+
+As well as the R3l Cosmos App (WIP): https://github.com/relevant-community/r3l/blob/main/cmd/r3ld/cmd/worker/computeRep.go
 
 ### Step 1. Import the Package and Initialize the Graph
 
