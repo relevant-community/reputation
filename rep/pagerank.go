@@ -1,7 +1,7 @@
-package detrep
+package rep
 
 import (
-	sdk "github.com/cosmos/cosmos-sdk/types"
+	"math"
 )
 
 // Rank computes the PageRank of every node in the directed graph.
@@ -9,13 +9,11 @@ import (
 // ε (epsilon) is the convergence criteria, usually set to a tiny value.
 //
 // This method will run as many iterations as needed, until the graph converges.
-func (graph Graph) Rank(callback func(key string, pRank sdk.Uint, nRank sdk.Uint)) {
+func (graph Graph) Rank(callback func(key string, pRank float64, nRank float64)) {
 	graph.Finalize()
 
-	one := graph.Precision
-
-	Δ := one
-	N := sdk.NewUint(uint64(len(graph.nodes)))
+	Δ := float64(1.0)
+	N := float64(len(graph.nodes))
 	pVector := graph.params.personalization
 	ε := graph.params.ε
 	α := graph.params.α
@@ -28,9 +26,9 @@ func (graph Graph) Rank(callback func(key string, pRank sdk.Uint, nRank sdk.Uint
 
 	// Normalize all the edge weights so that their sum amounts to 1.
 	for source := range graph.nodes {
-		if graph.nodes[source].degree.GT(sdk.ZeroUint()) {
+		if graph.nodes[source].degree > 0 {
 			for target := range graph.edges[source] {
-				graph.edges[source][target] = graph.edges[source][target].Mul(graph.Precision).Quo(graph.nodes[source].degree)
+				graph.edges[source][target] /= graph.nodes[source].degree
 			}
 		}
 	}
@@ -38,30 +36,29 @@ func (graph Graph) Rank(callback func(key string, pRank sdk.Uint, nRank sdk.Uint
 	graph.initScores(N, pWeights)
 
 	iter := 0
-	for Δ.GT(ε) {
-		danglingWeight := sdk.ZeroUint()
-		nodes := map[string]sdk.Uint{}
+	for Δ > ε {
+		danglingWeight := float64(0)
+		nodes := map[string]float64{}
 
 		for key, value := range graph.nodes {
 			nodes[key] = value.PRank
 
-			if value.degree.IsZero() {
-				danglingWeight = danglingWeight.Add(value.PRank)
+			if value.degree == 0 {
+				danglingWeight += value.PRank
 			}
 
-			graph.nodes[key].PRank = sdk.ZeroUint()
+			graph.nodes[key].PRank = 0
 		}
 
-		danglingWeight = danglingWeight.Mul(α).Quo(graph.Precision)
+		danglingWeight *= α
 
 		for source := range graph.nodes {
 			for target, weight := range graph.edges[source] {
-				addWeight := α.Mul(nodes[source]).Quo(graph.Precision).Mul(weight).Quo(graph.Precision)
-				graph.nodes[target].PRank = graph.nodes[target].PRank.Add(addWeight)
+				graph.nodes[target].PRank += α * nodes[source] * weight
 			}
 
 			if !personalized {
-				graph.nodes[source].PRank = graph.nodes[source].PRank.Add(one.Sub(α).Quo(N).Add(danglingWeight.Quo(N)))
+				graph.nodes[source].PRank += (1-α)/N + danglingWeight/N
 			}
 		}
 
@@ -69,23 +66,14 @@ func (graph Graph) Rank(callback func(key string, pRank sdk.Uint, nRank sdk.Uint
 		// this makes pagerank sybil resistant
 		if personalized {
 			for i, root := range pVector {
-				graph.nodes[root].PRank = graph.nodes[root].PRank.Add((one.Sub(α).Add(danglingWeight)).Mul(pWeights[i])).Quo(graph.Precision)
+				graph.nodes[root].PRank += (1 - α + danglingWeight) * pWeights[i]
 			}
 		}
 
-		Δ = sdk.ZeroUint()
+		Δ = 0
 
 		for key, value := range graph.nodes {
-			var diff sdk.Uint
-			// if _, ok := nodes[key]; ok == false {
-			// 	nodes[key] = sdk.ZeroUint()
-			// }
-			if value.PRank.LT(nodes[key]) {
-				diff = nodes[key].Sub(value.PRank)
-			} else {
-				diff = value.PRank.Sub(nodes[key])
-			}
-			Δ = Δ.Add(diff)
+			Δ += math.Abs(value.PRank - nodes[key])
 		}
 		iter++
 	}
@@ -96,16 +84,15 @@ func (graph Graph) Rank(callback func(key string, pRank sdk.Uint, nRank sdk.Uint
 
 // make sure the total start sum of all scores is 1
 // we initialze the start scores to optimize the computation
-func (graph Graph) initScores(N sdk.Uint, pWeights []sdk.Uint) {
+func (graph Graph) initScores(N float64, pWeights []float64) {
 	// get sum of all node scores
 	personalization := graph.params.personalization
-	totalScore := sdk.ZeroUint()
+	var totalScore float64
 	for _, node := range graph.nodes {
-		totalScore = totalScore.Add(node.PRank)
+		totalScore += node.PRank
 	}
 
-	// if start sum is close to 1 we are done
-	if totalScore.GT(graph.Precision.MulUint64(9).QuoUint64(10)) {
+	if totalScore > .9 {
 		return
 	}
 
@@ -113,40 +100,40 @@ func (graph Graph) initScores(N sdk.Uint, pWeights []sdk.Uint) {
 	if len(pWeights) == 0 {
 		// initialize all nodes if there is no personalizeation vector
 		for key := range graph.nodes {
-			graph.nodes[key].PRank = graph.nodes[key].PRank.Add(graph.Precision.Sub(totalScore).Quo(N))
+			graph.nodes[key].PRank += (1 - totalScore) / N
 		}
 		return
 	}
 	// initialize personalization vector
 	for i, root := range personalization {
-		graph.nodes[root].PRank = graph.nodes[root].PRank.Add(graph.Precision.Sub(totalScore).Mul(graph.Precision).Quo(pWeights[i]))
+		graph.nodes[root].PRank += (1 - totalScore) * pWeights[i]
 	}
 }
 
 // compute personalization weights based on degree
 // this ensures source nodes will have the same weight
 // we also update start scores here
-func (graph Graph) initPersonalizationNodes() []sdk.Uint {
+func (graph Graph) initPersonalizationNodes() []float64 {
 	pVector := graph.params.personalization
-	pWeights := make([]sdk.Uint, len(pVector))
+	pWeights := make([]float64, len(pVector))
 
-	pWeightsSum := sdk.ZeroUint()
-	scoreSum := sdk.ZeroUint()
+	var pWeightsSum float64
+	var scoreSum float64
 	for i, key := range pVector {
-		var d sdk.Uint
+		var d float64
 		// root node score and weight should not be 0
-		if d = graph.Precision; graph.nodes[key].degree.GT(sdk.ZeroUint()) {
+		if d = 1; graph.nodes[key].degree > 0 {
 			d = graph.nodes[key].degree
 		}
 		pWeights[i] = d
-		pWeightsSum = pWeightsSum.Add(d)
-		scoreSum = scoreSum.Add(graph.nodes[key].PRank)
+		pWeightsSum += d
+		scoreSum += graph.nodes[key].PRank
 	}
 
 	// normalize personalization weights
 	for i, key := range pVector {
-		pWeights[i] = pWeights[i].Mul(graph.Precision).Quo(pWeightsSum)
-		graph.nodes[key].PRank = scoreSum.Mul(pWeights[i]).Quo(graph.Precision)
+		pWeights[i] /= pWeightsSum
+		graph.nodes[key].PRank = scoreSum * pWeights[i]
 	}
 
 	return pWeights

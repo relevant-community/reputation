@@ -1,10 +1,6 @@
-package detrep
+package rep
 
-import (
-	sdk "github.com/cosmos/cosmos-sdk/types"
-)
-
-func (graph Graph) processResults(callback func(id string, pRank sdk.Uint, nRank sdk.Uint)) {
+func (graph Graph) processResults(callback func(id string, pRank float64, nRank float64)) {
 	graph.mergeNegatives()
 	for key, node := range graph.nodes {
 		callback(key, node.PRank, node.NRank)
@@ -17,8 +13,8 @@ func (graph Graph) mergeNegatives() {
 		if _, ok := graph.nodes[node.ID]; ok == false {
 			graph.nodes[node.ID] = &Node{
 				ID:       key,
-				PRank:    sdk.ZeroUint(),
-				degree:   sdk.ZeroUint(),
+				PRank:    0,
+				degree:   0,
 				nodeType: Positive,
 			}
 		}
