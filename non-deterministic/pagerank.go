@@ -41,24 +41,24 @@ func (graph Graph) Rank(callback func(key string, pRank float64, nRank float64))
 		nodes := map[string]float64{}
 
 		for key, value := range graph.nodes {
-			nodes[key] = value.rank
+			nodes[key] = value.PRank
 
 			if value.degree == 0 {
-				danglingWeight += value.rank
+				danglingWeight += value.PRank
 			}
 
-			graph.nodes[key].rank = 0
+			graph.nodes[key].PRank = 0
 		}
 
 		danglingWeight *= α
 
 		for source := range graph.nodes {
 			for target, weight := range graph.edges[source] {
-				graph.nodes[target].rank += α * nodes[source] * weight
+				graph.nodes[target].PRank += α * nodes[source] * weight
 			}
 
 			if !personalized {
-				graph.nodes[source].rank += (1-α)/N + danglingWeight/N
+				graph.nodes[source].PRank += (1-α)/N + danglingWeight/N
 			}
 		}
 
@@ -66,14 +66,14 @@ func (graph Graph) Rank(callback func(key string, pRank float64, nRank float64))
 		// this makes pagerank sybil resistant
 		if personalized {
 			for i, root := range pVector {
-				graph.nodes[root].rank += (1 - α + danglingWeight) * pWeights[i]
+				graph.nodes[root].PRank += (1 - α + danglingWeight) * pWeights[i]
 			}
 		}
 
 		Δ = 0
 
 		for key, value := range graph.nodes {
-			Δ += math.Abs(value.rank - nodes[key])
+			Δ += math.Abs(value.PRank - nodes[key])
 		}
 		iter++
 	}
@@ -89,7 +89,7 @@ func (graph Graph) initScores(N float64, pWeights []float64) {
 	personalization := graph.params.personalization
 	var totalScore float64
 	for _, node := range graph.nodes {
-		totalScore += node.rank
+		totalScore += node.PRank
 	}
 
 	if totalScore > .9 {
@@ -100,13 +100,13 @@ func (graph Graph) initScores(N float64, pWeights []float64) {
 	if len(pWeights) == 0 {
 		// initialize all nodes if there is no personalizeation vector
 		for key := range graph.nodes {
-			graph.nodes[key].rank += (1 - totalScore) / N
+			graph.nodes[key].PRank += (1 - totalScore) / N
 		}
 		return
 	}
 	// initialize personalization vector
 	for i, root := range personalization {
-		graph.nodes[root].rank += (1 - totalScore) * pWeights[i]
+		graph.nodes[root].PRank += (1 - totalScore) * pWeights[i]
 	}
 }
 
@@ -127,13 +127,13 @@ func (graph Graph) initPersonalizationNodes() []float64 {
 		}
 		pWeights[i] = d
 		pWeightsSum += d
-		scoreSum += graph.nodes[key].rank
+		scoreSum += graph.nodes[key].PRank
 	}
 
 	// normalize personalization weights
 	for i, key := range pVector {
 		pWeights[i] /= pWeightsSum
-		graph.nodes[key].rank = scoreSum * pWeights[i]
+		graph.nodes[key].PRank = scoreSum * pWeights[i]
 	}
 
 	return pWeights

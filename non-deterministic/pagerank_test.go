@@ -31,10 +31,10 @@ func TestEmpty(t *testing.T) {
 func TestSimple(t *testing.T) {
 	graph := NewGraph(0.85, 0.000001, 0)
 
-	a := NewNodeInput("a", 0, 0)
-	b := NewNodeInput("b", 0, 0)
-	c := NewNodeInput("c", 0, 0)
-	d := NewNodeInput("d", 0, 0)
+	a := NewNode("a", 0, 0)
+	b := NewNode("b", 0, 0)
+	c := NewNode("c", 0, 0)
+	d := NewNode("d", 0, 0)
 
 	// circle
 	graph.Link(a, b, 1.0)
@@ -65,9 +65,9 @@ func TestSimple(t *testing.T) {
 func TestWeighted(t *testing.T) {
 	graph := NewGraph(0.85, 0.000001, 0)
 
-	a := NewNodeInput("a", 0, 0)
-	b := NewNodeInput("b", 0, 0)
-	c := NewNodeInput("c", 0, 0)
+	a := NewNode("a", 0, 0)
+	b := NewNode("b", 0, 0)
+	c := NewNode("c", 0, 0)
 
 	graph.Link(a, b, 1.0)
 	graph.Link(a, c, 2.0)
@@ -89,10 +89,10 @@ func TestWeighted(t *testing.T) {
 func TestPersonalized(t *testing.T) {
 	graph := NewGraph(0.85, 0.000001, 0)
 
-	a := NewNodeInput("a", 0, 0)
-	b := NewNodeInput("b", 0, 0)
-	c := NewNodeInput("c", 0, 0)
-	d := NewNodeInput("d", 0, 0)
+	a := NewNode("a", 0, 0)
+	b := NewNode("b", 0, 0)
+	c := NewNode("c", 0, 0)
+	d := NewNode("d", 0, 0)
 
 	graph.AddPersonalizationNode(a)
 
@@ -125,10 +125,10 @@ func TestPersonalized(t *testing.T) {
 func TestPersonalizedNoLink(t *testing.T) {
 	graph := NewGraph(0.85, 0.000001, 0)
 
-	a := NewNodeInput("a", 0, 0)
-	b := NewNodeInput("b", 0, 0)
-	c := NewNodeInput("c", 0, 0)
-	d := NewNodeInput("d", 0, 0)
+	a := NewNode("a", 0, 0)
+	b := NewNode("b", 0, 0)
+	c := NewNode("c", 0, 0)
+	d := NewNode("d", 0, 0)
 
 	graph.AddPersonalizationNode(a)
 
@@ -159,10 +159,10 @@ func TestPersonalizedNoLink(t *testing.T) {
 func TestCancelOpposites(t *testing.T) {
 	graph := NewGraph(0.85, 0.000001, 0)
 
-	a := NewNodeInput("a", 0, 0)
-	b := NewNodeInput("b", 0, 0)
-	c := NewNodeInput("c", 0, 0)
-	d := NewNodeInput("d", 0, 0)
+	a := NewNode("a", 0, 0)
+	b := NewNode("b", 0, 0)
+	c := NewNode("c", 0, 0)
+	d := NewNode("d", 0, 0)
 
 	graph.AddPersonalizationNode(a)
 
@@ -198,11 +198,11 @@ func TestCancelOpposites(t *testing.T) {
 func TestNegativeLink(t *testing.T) {
 	graph := NewGraph(0.85, 0.000001, 0)
 
-	a := NewNodeInput("a", 0, 0)
-	b := NewNodeInput("b", 0, 0)
-	c := NewNodeInput("c", 0, 0)
-	d := NewNodeInput("d", 0, 0)
-	e := NewNodeInput("e", 0, 0)
+	a := NewNode("a", 0, 0)
+	b := NewNode("b", 0, 0)
+	c := NewNode("c", 0, 0)
+	d := NewNode("d", 0, 0)
+	e := NewNode("e", 0, 0)
 
 	graph.AddPersonalizationNode(a)
 
@@ -233,11 +233,11 @@ func TestNegativeLink(t *testing.T) {
 
 	graph = NewGraph(0.85, 0.000001, actual["negConsumer"].pRank)
 
-	a = NewNodeInput("a", actual["a"].pRank, actual["a"].nRank)
-	b = NewNodeInput("b", actual["b"].pRank, actual["b"].nRank)
-	c = NewNodeInput("c", actual["c"].pRank, actual["c"].nRank)
-	d = NewNodeInput("d", actual["d"].pRank, actual["d"].nRank)
-	e = NewNodeInput("e", actual["e"].pRank, actual["e"].nRank)
+	a = NewNode("a", actual["a"].pRank, actual["a"].nRank)
+	b = NewNode("b", actual["b"].pRank, actual["b"].nRank)
+	c = NewNode("c", actual["c"].pRank, actual["c"].nRank)
+	d = NewNode("d", actual["d"].pRank, actual["d"].nRank)
+	e = NewNode("e", actual["e"].pRank, actual["e"].nRank)
 
 	graph.AddPersonalizationNode(a)
 
@@ -262,11 +262,11 @@ func TestNegativeLink(t *testing.T) {
 func TestNegativeConsumer(t *testing.T) {
 	graph := NewGraph(0.85, 0.000001, 0)
 
-	a := NewNodeInput("a", 0, 0)
-	b := NewNodeInput("b", 0, 0)
-	c := NewNodeInput("c", 0, 0)
-	d := NewNodeInput("d", 0, 0)
-	e := NewNodeInput("e", 0, 0)
+	a := NewNode("a", 0, 0)
+	b := NewNode("b", 0, 0)
+	c := NewNode("c", 0, 0)
+	d := NewNode("d", 0, 0)
+	e := NewNode("e", 0, 0)
 
 	graph.AddPersonalizationNode(a)
 
@@ -291,11 +291,11 @@ func TestNegativeConsumer(t *testing.T) {
 
 	eRank := actual["e"].pRank
 
-	a = NewNodeInput("a", actual["a"].pRank, actual["a"].nRank)
-	b = NewNodeInput("b", actual["b"].pRank, actual["b"].nRank)
-	c = NewNodeInput("c", actual["c"].pRank, actual["c"].nRank)
-	d = NewNodeInput("d", actual["d"].pRank, actual["d"].nRank)
-	e = NewNodeInput("e", actual["e"].pRank, actual["e"].nRank)
+	a = NewNode("a", actual["a"].pRank, actual["a"].nRank)
+	b = NewNode("b", actual["b"].pRank, actual["b"].nRank)
+	c = NewNode("c", actual["c"].pRank, actual["c"].nRank)
+	d = NewNode("d", actual["d"].pRank, actual["d"].nRank)
+	e = NewNode("e", actual["e"].pRank, actual["e"].nRank)
 
 	graph.AddPersonalizationNode(a)
 
@@ -320,11 +320,11 @@ func TestNegativeConsumer(t *testing.T) {
 func TestMaxNeg(t *testing.T) {
 	graph := NewGraph(0.85, 0.000001, 0)
 
-	a := NewNodeInput("a", 0, 0)
-	b := NewNodeInput("b", 0, 0)
-	c := NewNodeInput("c", 0, 0)
-	d := NewNodeInput("d", 0, 0)
-	e := NewNodeInput("e", 0, 0)
+	a := NewNode("a", 0, 0)
+	b := NewNode("b", 0, 0)
+	c := NewNode("c", 0, 0)
+	d := NewNode("d", 0, 0)
+	e := NewNode("e", 0, 0)
 
 	graph.AddPersonalizationNode(a)
 
@@ -349,11 +349,11 @@ func TestMaxNeg(t *testing.T) {
 
 	eRank := actual["e"].pRank
 
-	a = NewNodeInput("a", actual["a"].pRank, actual["a"].nRank)
-	b = NewNodeInput("b", actual["b"].pRank, actual["b"].nRank)
-	c = NewNodeInput("c", actual["c"].pRank, actual["c"].nRank)
-	d = NewNodeInput("d", actual["d"].pRank, actual["d"].nRank)
-	e = NewNodeInput("e", 0, 0)
+	a = NewNode("a", actual["a"].pRank, actual["a"].nRank)
+	b = NewNode("b", actual["b"].pRank, actual["b"].nRank)
+	c = NewNode("c", actual["c"].pRank, actual["c"].nRank)
+	d = NewNode("d", actual["d"].pRank, actual["d"].nRank)
+	e = NewNode("e", 0, 0)
 
 	graph.AddPersonalizationNode(a)
 

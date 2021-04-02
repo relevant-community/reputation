@@ -247,11 +247,11 @@ func TestNegativeLink(t *testing.T) {
 
 	graph = NewGraphHelper(0.85, 0.000001, initNegativeConsumer)
 
-	a = NewNodeInput("a", actual["a"].pRank, actual["a"].nRank)
-	b = NewNodeInput("b", actual["b"].pRank, actual["b"].nRank)
-	c = NewNodeInput("c", actual["c"].pRank, actual["c"].nRank)
-	d = NewNodeInput("d", actual["d"].pRank, actual["d"].nRank)
-	e = NewNodeInput("e", actual["e"].pRank, actual["e"].nRank)
+	a = NewNode("a", actual["a"].pRank, actual["a"].nRank)
+	b = NewNode("b", actual["b"].pRank, actual["b"].nRank)
+	c = NewNode("c", actual["c"].pRank, actual["c"].nRank)
+	d = NewNode("d", actual["d"].pRank, actual["d"].nRank)
+	e = NewNode("e", actual["e"].pRank, actual["e"].nRank)
 
 	graph.AddPersonalizationNode(a)
 
@@ -309,11 +309,11 @@ func TestNegativeConsumer(t *testing.T) {
 
 	eRank := actual["e"].pRank
 
-	a = NewNodeInput("a", actual["a"].pRank, actual["a"].nRank)
-	b = NewNodeInput("b", actual["b"].pRank, actual["b"].nRank)
-	c = NewNodeInput("c", actual["c"].pRank, actual["c"].nRank)
-	d = NewNodeInput("d", actual["d"].pRank, actual["d"].nRank)
-	e = NewNodeInput("e", actual["e"].pRank, actual["e"].nRank)
+	a = NewNode("a", actual["a"].pRank, actual["a"].nRank)
+	b = NewNode("b", actual["b"].pRank, actual["b"].nRank)
+	c = NewNode("c", actual["c"].pRank, actual["c"].nRank)
+	d = NewNode("d", actual["d"].pRank, actual["d"].nRank)
+	e = NewNode("e", actual["e"].pRank, actual["e"].nRank)
 
 	graph.AddPersonalizationNode(a)
 
@@ -371,11 +371,11 @@ func TestMaxNeg(t *testing.T) {
 
 	eRank := actual["e"].pRank
 
-	a = NewNodeInput("a", actual["a"].pRank, actual["a"].nRank)
-	b = NewNodeInput("b", actual["b"].pRank, actual["b"].nRank)
-	c = NewNodeInput("c", actual["c"].pRank, actual["c"].nRank)
-	d = NewNodeInput("d", actual["d"].pRank, actual["d"].nRank)
-	e = NewNodeInput("e", actual["e"].pRank, actual["e"].nRank)
+	a = NewNode("a", actual["a"].pRank, actual["a"].nRank)
+	b = NewNode("b", actual["b"].pRank, actual["b"].nRank)
+	c = NewNode("c", actual["c"].pRank, actual["c"].nRank)
+	d = NewNode("d", actual["d"].pRank, actual["d"].nRank)
+	e = NewNode("e", actual["e"].pRank, actual["e"].nRank)
 
 	graph.AddPersonalizationNode(a)
 

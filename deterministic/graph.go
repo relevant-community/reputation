@@ -39,19 +39,11 @@ const Decimals = 18
 // otherwise, we counter the outgoing lings with one 'heavy' link proportional to the MaxNegOffset ratio
 const MaxNegOffset = 10
 
-// NodeInput is struct passing data to the graph
-// TODO does it make sense to just use the Node type?
-type NodeInput struct {
-	ID    string
-	PRank sdk.Uint
-	NRank sdk.Uint
-}
-
 // Node is an internal node struct
 type Node struct {
-	id       string
-	rank     sdk.Uint // pos page rank of the node
-	rankNeg  sdk.Uint // only used when combining results
+	ID       string
+	PRank    sdk.Uint // pos page rank of the node
+	NRank    sdk.Uint // only used when combining results
 	degree   sdk.Uint // sum of all outgoing links
 	nodeType NodeType
 }
@@ -62,7 +54,7 @@ type Graph struct {
 	negNodes     map[string]*Node
 	edges        map[string](map[string]sdk.Uint)
 	params       RankParams
-	negConsumer  NodeInput
+	negConsumer  Node
 	Precision    sdk.Uint
 	MaxNegOffset sdk.Uint
 }
@@ -87,21 +79,21 @@ func NewGraph(α sdk.Uint, ε sdk.Uint, negConsumerRank sdk.Uint) *Graph {
 			ε:               ε,
 			personalization: make([]string, 0),
 		},
-		negConsumer:  NodeInput{ID: "negConsumer", PRank: negConsumerRank, NRank: sdk.ZeroUint()},
+		negConsumer:  Node{ID: "negConsumer", PRank: negConsumerRank, NRank: sdk.ZeroUint()},
 		Precision:    sdk.NewUintFromBigInt(sdk.NewIntWithDecimal(1, Decimals).BigInt()),
 		MaxNegOffset: sdk.NewUintFromBigInt(sdk.NewIntWithDecimal(MaxNegOffset, Decimals).BigInt()),
 	}
 }
 
-// NewNodeInput is ahelper method to create a node input struct
-func NewNodeInput(id string, pRank sdk.Uint, nRank sdk.Uint) NodeInput {
-	return NodeInput{ID: id, PRank: pRank, NRank: nRank}
+// NewNode is ahelper method to create a node input struct
+func NewNode(id string, pRank sdk.Uint, nRank sdk.Uint) Node {
+	return Node{ID: id, PRank: pRank, NRank: nRank}
 }
 
 // AddPersonalizationNode adds a node to the pagerank personlization vector
 // these nodes will have high rank by default and all other rank will stem from them
 // this makes non-personalaziation nodes sybil resistant (they cannot increase their own rank)
-func (graph *Graph) AddPersonalizationNode(pNode NodeInput) {
+func (graph *Graph) AddPersonalizationNode(pNode Node) {
 	graph.params.personalization = append(graph.params.personalization, pNode.ID)
 	// this to ensures source nodes exist
 	graph.InitPosNode(pNode)
@@ -109,7 +101,7 @@ func (graph *Graph) AddPersonalizationNode(pNode NodeInput) {
 
 // Link creates a weighted edge between a source-target node pair.
 // If the edge already exists, the weight is incremented.
-func (graph *Graph) Link(source, target NodeInput, weight sdk.Int) {
+func (graph *Graph) Link(source, target Node, weight sdk.Int) {
 
 	// if a node's neg/pos rank is > MaxNegOffset / (MaxNegOffset + 1) we don't process it
 	if source.PRank.GT(sdk.ZeroUint()) {
@@ -166,17 +158,17 @@ func (graph *Graph) processNegatives() {
 
 	for _, negNode := range graph.negNodes {
 		// positive node doesn't exist
-		if _, ok := graph.nodes[negNode.id]; ok == false {
+		if _, ok := graph.nodes[negNode.ID]; ok == false {
 			return
 		}
 
 		// node has no outgpoing links
-		if graph.nodes[negNode.id].degree.IsZero() {
+		if graph.nodes[negNode.ID].degree.IsZero() {
 			return
 		}
 
-		posNode := graph.nodes[negNode.id]
-		if posNode.rank.IsZero() || negNode.rank.IsZero() {
+		posNode := graph.nodes[negNode.ID]
+		if posNode.PRank.IsZero() || negNode.PRank.IsZero() {
 			return
 		}
 		negConsumer := graph.initNode(negConsumerInput.ID, negConsumerInput, Positive)
@@ -184,7 +176,7 @@ func (graph *Graph) processNegatives() {
 		one := graph.Precision
 
 		// posNode.rank is not 0 check above
-		negPosRatio := negNode.rank.Mul(graph.Precision).Quo(posNode.rank)
+		negPosRatio := negNode.PRank.Mul(graph.Precision).Quo(posNode.PRank)
 
 		var negMultiple sdk.Uint
 
@@ -197,19 +189,19 @@ func (graph *Graph) processNegatives() {
 			negMultiple = one.Mul(graph.Precision).Quo(denom).Sub(one)
 		}
 		// cap the vote decrease at 10x
-		negWeight := negMultiple.Mul(graph.nodes[negNode.id].degree).Quo(graph.Precision)
+		negWeight := negMultiple.Mul(graph.nodes[negNode.ID].degree).Quo(graph.Precision)
 
 		// this should actually never happen if degree is > 0
-		if _, ok := graph.edges[negNode.id]; ok == false {
-			graph.edges[negNode.id] = map[string]sdk.Uint{}
+		if _, ok := graph.edges[negNode.ID]; ok == false {
+			graph.edges[negNode.ID] = map[string]sdk.Uint{}
 		}
 
-		if _, ok := graph.edges[negNode.id][negConsumer.id]; ok == false {
-			graph.edges[negNode.id][negConsumer.id] = sdk.ZeroUint()
+		if _, ok := graph.edges[negNode.ID][negConsumer.ID]; ok == false {
+			graph.edges[negNode.ID][negConsumer.ID] = sdk.ZeroUint()
 		}
 
-		graph.edges[negNode.id][negConsumer.id] = graph.edges[negNode.id][negConsumer.id].Add(negWeight)
-		graph.nodes[negNode.id].degree = graph.nodes[negNode.id].degree.Add(negWeight)
+		graph.edges[negNode.ID][negConsumer.ID] = graph.edges[negNode.ID][negConsumer.ID].Add(negWeight)
+		graph.nodes[negNode.ID].degree = graph.nodes[negNode.ID].degree.Add(negWeight)
 	}
 }
 
@@ -221,47 +213,47 @@ func (graph *Graph) cancelOpposites(sourceNode Node, target string, nodeType Nod
 		oppositeKey = getKey(target, Negative)
 	}
 
-	if _, ok := graph.edges[sourceNode.id][oppositeKey]; ok == false {
+	if _, ok := graph.edges[sourceNode.ID][oppositeKey]; ok == false {
 		return
 	}
 
-	edge := graph.edges[sourceNode.id][key]
-	opositeEdge := graph.edges[sourceNode.id][oppositeKey]
+	edge := graph.edges[sourceNode.ID][key]
+	opositeEdge := graph.edges[sourceNode.ID][oppositeKey]
 
 	switch {
 	case opositeEdge.GT(edge):
-		graph.removeEdge(sourceNode.id, key)
-		graph.edges[sourceNode.id][oppositeKey] = opositeEdge.Sub(edge)
+		graph.removeEdge(sourceNode.ID, key)
+		graph.edges[sourceNode.ID][oppositeKey] = opositeEdge.Sub(edge)
 		// remove degree from both delete node and the adjustment
 		sourceNode.degree = sourceNode.degree.Sub(edge.Mul(sdk.NewUint(2)))
 
 	case edge.GT(opositeEdge):
-		graph.removeEdge(sourceNode.id, oppositeKey)
-		graph.edges[sourceNode.id][key] = edge.Sub(opositeEdge)
+		graph.removeEdge(sourceNode.ID, oppositeKey)
+		graph.edges[sourceNode.ID][key] = edge.Sub(opositeEdge)
 		// remove degree from both delete node and the adjustment
 		sourceNode.degree = sourceNode.degree.Sub(opositeEdge.Mul(sdk.NewUint(2)))
 
 	case edge.Equal(opositeEdge):
-		graph.removeEdge(sourceNode.id, oppositeKey)
-		graph.removeEdge(sourceNode.id, key)
+		graph.removeEdge(sourceNode.ID, oppositeKey)
+		graph.removeEdge(sourceNode.ID, key)
 
 		sourceNode.degree = sourceNode.degree.Sub(opositeEdge.Mul(sdk.NewUint(2)))
 	}
 }
 
 // InitPosNode initialized a positive node
-func (graph *Graph) InitPosNode(inputNode NodeInput) *Node {
+func (graph *Graph) InitPosNode(inputNode Node) *Node {
 	return graph.initNode(inputNode.ID, inputNode, Positive)
 }
 
 // initNode initialized a node
-func (graph *Graph) initNode(key string, inputNode NodeInput, nodeType NodeType) *Node {
+func (graph *Graph) initNode(key string, inputNode Node, nodeType NodeType) *Node {
 	if _, ok := graph.nodes[key]; ok == false {
 		graph.nodes[key] = &Node{
-			id:       inputNode.ID, // id is independent of pos/neg keys
+			ID:       inputNode.ID, // id is independent of pos/neg keys
 			degree:   sdk.ZeroUint(),
-			rank:     sdk.ZeroUint(),
-			rankNeg:  sdk.ZeroUint(),
+			PRank:    sdk.ZeroUint(),
+			NRank:    sdk.ZeroUint(),
 			nodeType: nodeType,
 		}
 		// store negative nodes so we can easily merge them later
@@ -274,7 +266,7 @@ func (graph *Graph) initNode(key string, inputNode NodeInput, nodeType NodeType)
 	if prevRank = inputNode.PRank; nodeType == Negative {
 		prevRank = inputNode.NRank
 	}
-	graph.nodes[key].rank = prevRank
+	graph.nodes[key].PRank = prevRank
 	return graph.nodes[key]
 }
 
