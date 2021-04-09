@@ -61,11 +61,9 @@ func renderGraph() {
 
 	page.AddCharts(
 		repGraph(data1, title1),
-		// repGraph(data1, title1),
-		// repGraph(data1, title1),
 	)
 
-	f, err := os.Create("dist/index.html")
+	f, err := os.Create("index.html")
 	if err != nil {
 		panic(err)
 
@@ -75,6 +73,6 @@ func renderGraph() {
 
 func main() {
 	renderGraph()
-	http.Handle("/", http.FileServer(http.Dir("./dist")))
+	http.Handle("/", http.FileServer(http.Dir("./")))
 	http.ListenAndServe(":7000", nil)
 }
