@@ -18,6 +18,10 @@ Because the algorithm supports negative links, it can be used to represent upvot
 
 The deterministiv version of the algorithm uses `Uint` and safe-math libs from [Cosmos Sdk](https://github.com/cosmos/cosmos-sdk) to avoid floating point computations. It can be used in a blockchain environment where concensus is required.
 
+## Graph Visualizations:
+
+https://relevant-community.github.io/reputation/
+
 ## Usage
 
 For complete usage examples, check out the test files: https://github.com/relevant-community/reputation/blob/main/rep/pagerank_test.go and https://github.com/relevant-community/reputation/blob/main/detrep/pagerank_test.go
@@ -38,7 +42,7 @@ graph := rep.NewGraph(0.85, 1e-8, 0)
 
 `NewGraph` params:
 
-1.  `α` is the probability of not doing a jump during a random walk, usually `.85`
+1.  `α` is the probability of not doing a jump during a random walk, usually `.85`, but can be `1` when including a personalization vector.
 2.  `ε` is the error margin required to approximate convergence, usually something small
 3.  The third parameter is a cached rank of the negative consumer node. This is an extra node we add to the graph to enable negative links, and this is its rank from previous computations.
 
